@@ -82,5 +82,5 @@ const CONFIG = {
   // 5) Lernziel in Minuten pro Kapitel, gegen das der Fortschrittsbalken
   //    anzeigt (rein visuelle Orientierung, keine harte Vorgabe). Einfach
   //    anpassen, wenn du einen anderen Richtwert möchtest.
-  LERNZIEL_MINUTEN_PRO_KAPITEL: 30
+  LERNZIEL_MINUTEN_PRO_KAPITEL: 120
 };
