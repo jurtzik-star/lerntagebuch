@@ -12,20 +12,31 @@ Deep-Link mit Name und Kurs aus den drei Kurs-Apps heraus geöffnet.
 
 1. TN geben (beim ersten Mal, oder per Deep-Link automatisch vorbefüllt)
    Name und Kurs ein.
-2. Danach sehen sie ein kurzes Formular mit vier festen Reflexionsfragen:
-   - Woran haben wir gerade gearbeitet? (Kapitel/Thema, optional)
+2. Danach sehen sie ein kurzes Formular:
+   - Zu welchem Kapitel gehört diese Einheit? (Dropdown 1 bis N, je nach
+     Kurs, optional - "kein bestimmtes Kapitel" geht auch)
    - Was habe ich heute / in dieser Einheit gelernt?
    - Was war für mich schwierig?
    - Was möchte ich als Nächstes besonders üben?
+   - Wie lange habe ich in dieser Einheit geübt? (Dropdown 5-90 Minuten,
+     Pflichtfeld)
    - dazu eine 5-stufige Selbsteinschätzung ("Wie sicher fühle ich mich
      gerade insgesamt?").
 3. Nach dem Speichern erscheint der Eintrag sofort in der Liste "Meine
    bisherigen Einträge" darunter (nur die eigenen, gefiltert nach Name +
    Kurs) - für die TN selbst zum Nachlesen/Nachverfolgen des eigenen
-   Lernfortschritts.
+   Lernfortschritts. Direkt darüber zeigt ein neuer Abschnitt "Meine
+   Lernzeit pro Kapitel" für jedes Kapitel des gewählten Kurses einen
+   Fortschrittsbalken - Summe der eingetragenen Minuten aus allen eigenen
+   Einträgen zu diesem Kapitel, gegen ein Lernziel (Default 30 Minuten pro
+   Kapitel, siehe `LERNZIEL_MINUTEN_PRO_KAPITEL` in `config.js`), mit einem
+   ✓ sobald das Ziel erreicht ist. Minuten aus Einträgen ohne Kapitelbezug
+   fließen nur in die Gesamtsumme oben, nicht in einen einzelnen Balken.
 4. Gleichzeitig wird der Eintrag an ein Google Formular übermittelt,
    damit du als Lehrkraft mitlesen kannst - genau wie bei Schreib-/
-   Sprechtraining.
+   Sprechtraining. Das gewählte Kapitel wird dabei weiterhin im bisherigen
+   "Thema"-Feld des Formulars übertragen (z. B. "Kapitel 3"), dafür ist
+   keine Formular-Änderung nötig.
 
 Die Einträge liegen **nur lokal im jeweiligen Browser** des TN
 (`localStorage`, kein Server, kein Geräte-Sync) - fürs Nachlesen durch
@@ -80,25 +91,59 @@ Neuigkeiten-Eintrag, der die neue Kachel kurz erklärt.
 
 ## Weitere Anpassungen
 
-Die drei festen Reflexionsfragen sowie die 5-stufige Skala sind aktuell
-fest im Code (`index.html`/`app.js`) hinterlegt - eine Änderung der
-Formulierungen oder der Skala erfordert eine kleine Anpassung dort, ist
-aber unabhängig von den Kurs-Apps oder dem Google Formular.
+Die Reflexionsfragen sowie die 5-stufige Skala sind aktuell fest im Code
+(`index.html`/`app.js`) hinterlegt - eine Änderung der Formulierungen oder
+der Skala erfordert eine kleine Anpassung dort, ist aber unabhängig von
+den Kurs-Apps oder dem Google Formular.
+
+## Neu: Lernzeit-Fortschritt pro Kapitel
+
+TN wählen bei jedem Eintrag jetzt zusätzlich ein Kapitel (Dropdown statt
+Freitext, wie zuvor bei "Thema") und wie lange sie geübt haben
+(Pflichtfeld). Daraus baut die App direkt im Formular einen
+Fortschrittsbalken pro Kapitel - rein lokal aus den eigenen
+`localStorage`-Einträgen berechnet, kein Server nötig. Zwei Dinge dazu in
+`config.js`:
+
+- `KAPITEL_ANZAHL_BY_KURS` legt fest, wie viele Kapitel das Dropdown und
+  die Fortschrittsbalken pro Kurs anzeigen (aktuell B1: 12, BSK-B1+: 7,
+  BSK-B2: 12, passend zum Kapitel-Cockpit-Artefakt) - bei Bedarf im
+  Semesterverlauf anpassen.
+- `LERNZIEL_MINUTEN_PRO_KAPITEL` (Default 30) ist der Richtwert, gegen den
+  der Balken pro Kapitel läuft; rein visuelle Orientierung, keine harte
+  Vorgabe.
+
+Das gewählte Kapitel wird weiterhin im bestehenden "Thema"-Feld des
+Google Formulars übertragen (z. B. "Kapitel 3") - dafür musste an den
+drei Formularen nichts geändert werden. Die Übungsminuten selbst sind
+ebenfalls bereits eingerichtet: du hast in allen drei Formularen ein
+eigenes Feld "Wie lange geübt (Minuten)" ergänzt, die drei
+kursspezifischen `entry.XXXXXXXXX`-IDs sind in
+`GOOGLE_FORM_ENTRY_IDS_MINUTEN_BY_KURS` in `config.js` eingetragen (pro
+Kurs eine andere ID, da das Feld nachträglich einzeln hinzugefügt wurde,
+nicht beim Duplizieren mitkopiert) und live gegen alle drei Formulare
+getestet - die Lehrkraft sieht die Minuten damit auch direkt im
+Formular/der Tabelle.
 
 ## Was getestet wurde
 
 Playwright-Test deckt ab: Namens-/Kurseingabe und Wechsel zum
 Eintragsformular, Validierungsfehler bei fehlendem Text zu "Was habe ich
-gelernt?" bzw. fehlender Sicherheitsauswahl, erfolgreiches Speichern
-(Formular wird geleert, neuer Eintrag erscheint oben in der Liste,
-Zähler "(1)"/"(2)" korrekt), sowie Deep-Link mit vorbefülltem Name/Kurs
-inkl. korrekter Fußzeile. Zusätzlich wurde die Übermittlung an das
-Google Formular (no-cors POST) nach demselben Muster wie bei Schreib-/
-Sprechtraining eingebaut, konnte aber mangels Zugriff auf ein echtes
-Formular nur strukturell (URL-Aufbau, Feld-Mapping), nicht live getestet
-werden - bitte nach dem Eintragen der echten entry-IDs einmal live einen
-Testeintrag speichern und im Formular/der verknüpften Tabelle
-kontrollieren.
+gelernt?", fehlender Sicherheitsauswahl bzw. fehlender Minuten-Angabe,
+erfolgreiches Speichern (Formular wird geleert, neuer Eintrag erscheint
+oben in der Liste, Zähler "(1)"/"(2)" korrekt), sowie Deep-Link mit
+vorbefülltem Name/Kurs inkl. korrekter Fußzeile. Zusätzlich wurde die
+Übermittlung an das Google Formular (no-cors POST) nach demselben Muster
+wie bei Schreib-/Sprechtraining eingebaut und live gegen die drei echten
+Formulare getestet (siehe Verlauf oben).
+
+Für den neuen Fortschritts-Balken zusätzlich per Playwright getestet:
+Kapitel-Dropdown zeigt die richtige Anzahl Kapitel je nach Kurs (z. B. 7
+bei BSK-B1+), Speichern ohne Minuten-Auswahl wird abgelehnt, mehrere
+Einträge zum selben Kapitel werden korrekt aufsummiert (inkl. ✓-Markierung
+bei Erreichen des Lernziels), Einträge ohne Kapitelbezug fließen nur in
+die Gesamtsumme, nicht in einen einzelnen Balken - keine JS-Fehler in der
+Konsole.
 
 Für die drei Kurs-Apps wurde zusätzlich per Playwright-Test bestätigt,
 dass die neue "📔 Lerntagebuch"-Kachel in allen drei Apps (B1, BSK-B1+,

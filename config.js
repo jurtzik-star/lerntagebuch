@@ -46,10 +46,41 @@ const CONFIG = {
     gelernt: "entry.1667135733",
     schwierig: "entry.1365796381",
     ueben: "entry.1908782762",
-    sicherheit: "entry.951934711"
+    sicherheit: "entry.951934711",
+    // Fallback-entry-ID für "Wie lange geübt (Minuten)", falls ein Kurs in
+    // GOOGLE_FORM_ENTRY_IDS_MINUTEN_BY_KURS unten fehlt. Leer lassen, solange
+    // kein Formular dieses Feld hat - der Fortschrittsbalken in der App
+    // funktioniert auch ohne, nur landen die Minuten dann nicht zusätzlich im
+    // Formular/der Tabelle.
+    minuten: ""
+  },
+
+  // 2b) Das Minuten-Feld wurde nachträglich einzeln zu jedem der drei
+  //     Formulare hinzugefügt (nicht beim Duplizieren mitkopiert) und hat
+  //     deshalb pro Kurs eine eigene entry-ID - anders als die übrigen Felder
+  //     oben, die bei allen drei Formularen identisch sind.
+  GOOGLE_FORM_ENTRY_IDS_MINUTEN_BY_KURS: {
+    "B1 Oberndorf (KL T. Jurtzik)": "entry.1375642204",
+    "BSK-B1+ Rottweil (KL T. Jurtzik)": "entry.1138130224",
+    "BSK-B2 Rottweil (KL T. Jurtzik)": "entry.1661136890"
   },
 
   // 3) Auswahlliste der Kurse/Gruppen, die im Dropdown der App erscheinen.
   //    Einfach anpassen/erweitern.
-  KURSE: ["B1 Oberndorf (KL T. Jurtzik)", "BSK-B1+ Rottweil (KL T. Jurtzik)", "BSK-B2 Rottweil (KL T. Jurtzik)"]
+  KURSE: ["B1 Oberndorf (KL T. Jurtzik)", "BSK-B1+ Rottweil (KL T. Jurtzik)", "BSK-B2 Rottweil (KL T. Jurtzik)"],
+
+  // 4) Wie viele Kapitel hat der jeweilige Kurs? Steuert die Kapitel-Auswahl
+  //    im Formular sowie die Anzahl der Fortschrittsbalken ("Meine Lernzeit
+  //    pro Kapitel"). Bitte bei Bedarf im Semesterverlauf anpassen (siehe
+  //    auch das Kapitel-Cockpit-Artefakt für den aktuellen Stand).
+  KAPITEL_ANZAHL_BY_KURS: {
+    "B1 Oberndorf (KL T. Jurtzik)": 12,
+    "BSK-B1+ Rottweil (KL T. Jurtzik)": 7,
+    "BSK-B2 Rottweil (KL T. Jurtzik)": 12
+  },
+
+  // 5) Lernziel in Minuten pro Kapitel, gegen das der Fortschrittsbalken
+  //    anzeigt (rein visuelle Orientierung, keine harte Vorgabe). Einfach
+  //    anpassen, wenn du einen anderen Richtwert möchtest.
+  LERNZIEL_MINUTEN_PRO_KAPITEL: 30
 };

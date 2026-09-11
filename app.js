@@ -34,13 +34,17 @@
     btnStart: document.getElementById("btn-start"),
 
     entryDate: document.getElementById("entryDate"),
-    inputThema: document.getElementById("input-thema"),
+    inputKapitel: document.getElementById("input-kapitel"),
     inputGelernt: document.getElementById("input-gelernt"),
     inputSchwierig: document.getElementById("input-schwierig"),
     inputUeben: document.getElementById("input-ueben"),
+    inputMinuten: document.getElementById("input-minuten"),
     ratingRow: document.getElementById("ratingRow"),
     btnSave: document.getElementById("btn-save"),
     saveHint: document.getElementById("saveHint"),
+
+    progressTotal: document.getElementById("progressTotal"),
+    progressList: document.getElementById("progressList"),
 
     historyCount: document.getElementById("historyCount"),
     historyList: document.getElementById("historyList")
@@ -94,11 +98,28 @@
     return d.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   }
 
+  // ---------- Kapitel-Auswahl (abhängig vom gewählten Kurs) ----------
+  function anzahlKapitel() {
+    return (CONFIG.KAPITEL_ANZAHL_BY_KURS && CONFIG.KAPITEL_ANZAHL_BY_KURS[state.kurs]) || 12;
+  }
+
+  function populateKapitelOptions() {
+    const anzahl = anzahlKapitel();
+    el.inputKapitel.innerHTML = '<option value="">– kein bestimmtes Kapitel –</option>';
+    for (let k = 1; k <= anzahl; k++) {
+      const opt = document.createElement("option");
+      opt.value = String(k);
+      opt.textContent = "Kapitel " + k;
+      el.inputKapitel.appendChild(opt);
+    }
+  }
+
   function resetForm() {
-    el.inputThema.value = "";
+    el.inputKapitel.value = "";
     el.inputGelernt.value = "";
     el.inputSchwierig.value = "";
     el.inputUeben.value = "";
+    el.inputMinuten.value = "";
     const checked = el.ratingRow.querySelector("input:checked");
     if (checked) checked.checked = false;
   }
@@ -138,7 +159,8 @@
         <details class="history-entry"${i === 0 ? " open" : ""}>
           <summary>
             ${escapeHtml(kurzdatum)}
-            ${entry.thema ? `<span class="entry-theme">– ${escapeHtml(entry.thema)}</span>` : ""}
+            ${entry.kapitel ? `<span class="entry-theme">– Kapitel ${escapeHtml(entry.kapitel)}</span>` : ""}
+            ${entry.minuten ? `<span class="entry-minutes">${escapeHtml(String(entry.minuten))} Min</span>` : ""}
             ${entry.sicherheit ? `<span class="entry-rating">Sicherheit ${escapeHtml(entry.sicherheit)}/5</span>` : ""}
           </summary>
           <div class="entry-body">
@@ -149,6 +171,54 @@
         </details>`;
       })
       .join("");
+  }
+
+  // ---------- Lernzeit-Fortschritt pro Kapitel ----------
+  function computeProgress() {
+    const entries = myEntries();
+    const totalMinuten = entries.reduce((sum, e) => sum + (Number(e.minuten) || 0), 0);
+    const anzahl = anzahlKapitel();
+    const ziel = CONFIG.LERNZIEL_MINUTEN_PRO_KAPITEL || 30;
+    const perKapitel = {};
+    for (let k = 1; k <= anzahl; k++) perKapitel[k] = 0;
+    let ohneKapitel = 0;
+    entries.forEach((e) => {
+      const min = Number(e.minuten) || 0;
+      if (!min) return;
+      if (e.kapitel && perKapitel.hasOwnProperty(e.kapitel)) {
+        perKapitel[e.kapitel] += min;
+      } else {
+        ohneKapitel += min;
+      }
+    });
+    return { totalMinuten, anzahl, ziel, perKapitel, ohneKapitel, anzahlEintraege: entries.length };
+  }
+
+  function renderProgress() {
+    const { totalMinuten, anzahl, ziel, perKapitel, ohneKapitel, anzahlEintraege } = computeProgress();
+
+    el.progressTotal.textContent = totalMinuten > 0
+      ? "Insgesamt " + totalMinuten + " Minuten geübt (in " + anzahlEintraege + (anzahlEintraege === 1 ? " Eintrag" : " Einträgen") + ")."
+      : "Sobald du bei einem Eintrag Kapitel und Übungszeit angibst, siehst du hier deinen Fortschritt pro Kapitel.";
+
+    let rows = "";
+    for (let k = 1; k <= anzahl; k++) {
+      const min = perKapitel[k] || 0;
+      const pct = Math.max(0, Math.min(100, Math.round((min / ziel) * 100)));
+      const erreicht = min >= ziel;
+      rows += `
+        <div class="progress-row">
+          <div class="progress-label">Kapitel ${k}</div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill${erreicht ? " reached" : ""}" style="width:${pct}%"></div>
+          </div>
+          <div class="progress-value">${min} / ${ziel} Min${erreicht ? " ✓" : ""}</div>
+        </div>`;
+    }
+    if (ohneKapitel > 0) {
+      rows += `<p class="progress-note">+ ${ohneKapitel} Minuten aus Einträgen ohne Kapitel-Zuordnung</p>`;
+    }
+    el.progressList.innerHTML = rows;
   }
 
   // ---------- Ablauf ----------
@@ -162,7 +232,9 @@
     localStorage.setItem(LS_KEY_PROFILE, JSON.stringify({ name: state.name, kurs: state.kurs }));
     updateFooterText();
     el.entryDate.textContent = formatDatum(new Date());
+    populateKapitelOptions();
     renderHistory();
+    renderProgress();
     showStep(el.stepDiary);
   }
 
@@ -183,16 +255,23 @@
       el.saveHint.classList.add("error");
       return;
     }
+    if (!el.inputMinuten.value) {
+      el.saveHint.textContent = "Bitte gib noch an, wie lange du geübt hast.";
+      el.saveHint.classList.add("error");
+      el.inputMinuten.focus();
+      return;
+    }
 
     const entry = {
       id: Date.now() + "-" + Math.random().toString(36).slice(2, 8),
       name: state.name,
       kurs: state.kurs,
       datumIso: new Date().toISOString(),
-      thema: el.inputThema.value.trim(),
+      kapitel: el.inputKapitel.value,
       gelernt,
       schwierig: el.inputSchwierig.value.trim(),
       ueben: el.inputUeben.value.trim(),
+      minuten: Number(el.inputMinuten.value),
       sicherheit: ratingEl.value
     };
 
@@ -200,6 +279,7 @@
     all.push(entry);
     saveAllEntries(all);
     renderHistory();
+    renderProgress();
     resetForm();
 
     el.saveHint.classList.remove("error");
@@ -222,11 +302,21 @@
     formData.append(ids.name, entry.name);
     formData.append(ids.kurs, entry.kurs);
     formData.append(ids.datum, new Date(entry.datumIso).toLocaleDateString("de-DE"));
-    formData.append(ids.thema, entry.thema || "");
+    formData.append(ids.thema, entry.kapitel ? "Kapitel " + entry.kapitel : "");
     formData.append(ids.gelernt, entry.gelernt || "");
     formData.append(ids.schwierig, entry.schwierig || "");
     formData.append(ids.ueben, entry.ueben || "");
     formData.append(ids.sicherheit, entry.sicherheit || "");
+    // Minuten-Feld ist optional - wird nur mitgeschickt, wenn eine entry-ID
+    // konfiguriert ist. Das Feld wurde nachträglich einzeln zu jedem Formular
+    // hinzugefügt, daher zuerst die kursspezifische ID versuchen und nur bei
+    // Bedarf auf die gemeinsame Fallback-ID zurückfallen.
+    const minutenId =
+      (CONFIG.GOOGLE_FORM_ENTRY_IDS_MINUTEN_BY_KURS && CONFIG.GOOGLE_FORM_ENTRY_IDS_MINUTEN_BY_KURS[entry.kurs]) ||
+      ids.minuten;
+    if (minutenId) {
+      formData.append(minutenId, entry.minuten != null ? String(entry.minuten) : "");
+    }
 
     const actionUrl =
       (CONFIG.GOOGLE_FORM_ACTION_URL_BY_KURS && CONFIG.GOOGLE_FORM_ACTION_URL_BY_KURS[entry.kurs]) ||

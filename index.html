@@ -35,8 +35,8 @@
       <h2>2. Neuer Eintrag</h2>
       <p class="entry-date" id="entryDate"></p>
 
-      <label for="input-thema">Woran haben wir gerade gearbeitet? <span class="optional">(Kapitel/Thema, optional)</span></label>
-      <input type="text" id="input-thema" placeholder="z. B. Kapitel 3, Wortschatz Arbeitssuche" autocomplete="off" />
+      <label for="input-kapitel">Zu welchem Kapitel gehört diese Einheit? <span class="optional">(optional)</span></label>
+      <select id="input-kapitel"></select>
 
       <label for="input-gelernt">Was habe ich heute / in dieser Einheit gelernt?</label>
       <textarea id="input-gelernt" rows="3" placeholder="Schreib hier, was du gelernt hast..."></textarea>
@@ -46,6 +46,19 @@
 
       <label for="input-ueben">Was möchte ich als Nächstes besonders üben?</label>
       <textarea id="input-ueben" rows="3" placeholder="Schreib hier, woran du weiterarbeiten möchtest..."></textarea>
+
+      <label for="input-minuten">Wie lange habe ich in dieser Einheit geübt?</label>
+      <select id="input-minuten">
+        <option value="">Bitte wählen</option>
+        <option value="5">5 Minuten</option>
+        <option value="10">10 Minuten</option>
+        <option value="15">15 Minuten</option>
+        <option value="20">20 Minuten</option>
+        <option value="30">30 Minuten</option>
+        <option value="45">45 Minuten</option>
+        <option value="60">60 Minuten</option>
+        <option value="90">mehr als 60 Minuten</option>
+      </select>
 
       <label>Wie sicher fühle ich mich gerade insgesamt?</label>
       <div class="rating-row" id="ratingRow" role="radiogroup" aria-label="Sicherheitsgefühl von 1 bis 5">
@@ -60,6 +73,12 @@
         <button id="btn-save" class="btn-primary">Eintrag speichern</button>
       </div>
       <p class="save-hint" id="saveHint"></p>
+
+      <div class="progress-section">
+        <h2 class="progress-heading">Meine Lernzeit pro Kapitel</h2>
+        <p class="progress-total" id="progressTotal"></p>
+        <div id="progressList" class="progress-list"></div>
+      </div>
 
       <h2 class="history-heading">Meine bisherigen Einträge <span class="history-count" id="historyCount"></span></h2>
       <div id="historyList" class="history-list"></div>
