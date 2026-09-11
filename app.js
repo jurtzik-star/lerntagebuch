@@ -293,7 +293,14 @@
 
   // ---------- Übermittlung an Google Formular ----------
   async function submitToGoogleForm(entry) {
-    if (!CONFIG.GOOGLE_FORM_ACTION_URL || CONFIG.GOOGLE_FORM_ACTION_URL.includes("DEINE-FORM-ID")) {
+    // Wichtig: die tatsächlich verwendete URL prüfen (kursspezifisch, falls
+    // vorhanden), nicht nur die allgemeine Fallback-URL - sonst bricht die
+    // Übermittlung fälschlich ab, obwohl der Kurs längst ein eigenes,
+    // korrekt eingerichtetes Formular hat.
+    const actionUrl =
+      (CONFIG.GOOGLE_FORM_ACTION_URL_BY_KURS && CONFIG.GOOGLE_FORM_ACTION_URL_BY_KURS[entry.kurs]) ||
+      CONFIG.GOOGLE_FORM_ACTION_URL;
+    if (!actionUrl || actionUrl.includes("DEINE-FORM-ID")) {
       console.warn("Google-Formular ist noch nicht konfiguriert (config.js).");
       return;
     }
@@ -317,10 +324,6 @@
     if (minutenId) {
       formData.append(minutenId, entry.minuten != null ? String(entry.minuten) : "");
     }
-
-    const actionUrl =
-      (CONFIG.GOOGLE_FORM_ACTION_URL_BY_KURS && CONFIG.GOOGLE_FORM_ACTION_URL_BY_KURS[entry.kurs]) ||
-      CONFIG.GOOGLE_FORM_ACTION_URL;
 
     // no-cors: wir bekommen keine lesbare Antwort, aber die Übermittlung
     // an Google Forms funktioniert damit zuverlässig cross-origin.
