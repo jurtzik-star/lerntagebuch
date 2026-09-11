@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lerntagebuch</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-top">
+      <div class="header-titles">
+        <h1>📔 Lerntagebuch</h1>
+        <p class="subtitle">Halte kurz fest, was du gelernt hast, was schwierig war und was du als Nächstes üben möchtest.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <!-- Schritt 1: Angaben zur Person -->
+    <section id="step-intro" class="card">
+      <h2>1. Kurz zu dir</h2>
+      <label for="input-name">Name</label>
+      <input type="text" id="input-name" placeholder="Dein Name" autocomplete="off" />
+
+      <label for="input-kurs">Kurs / Gruppe</label>
+      <select id="input-kurs"></select>
+
+      <button id="btn-start" class="btn-primary">Weiter zum Lerntagebuch</button>
+    </section>
+
+    <!-- Schritt 2: Neuer Eintrag + Verlauf -->
+    <section id="step-diary" class="card hidden">
+      <h2>2. Neuer Eintrag</h2>
+      <p class="entry-date" id="entryDate"></p>
+
+      <label for="input-thema">Woran haben wir gerade gearbeitet? <span class="optional">(Kapitel/Thema, optional)</span></label>
+      <input type="text" id="input-thema" placeholder="z. B. Kapitel 3, Wortschatz Arbeitssuche" autocomplete="off" />
+
+      <label for="input-gelernt">Was habe ich heute / in dieser Einheit gelernt?</label>
+      <textarea id="input-gelernt" rows="3" placeholder="Schreib hier, was du gelernt hast..."></textarea>
+
+      <label for="input-schwierig">Was war für mich schwierig?</label>
+      <textarea id="input-schwierig" rows="3" placeholder="Schreib hier, was dir schwerfiel..."></textarea>
+
+      <label for="input-ueben">Was möchte ich als Nächstes besonders üben?</label>
+      <textarea id="input-ueben" rows="3" placeholder="Schreib hier, woran du weiterarbeiten möchtest..."></textarea>
+
+      <label>Wie sicher fühle ich mich gerade insgesamt?</label>
+      <div class="rating-row" id="ratingRow" role="radiogroup" aria-label="Sicherheitsgefühl von 1 bis 5">
+        <label class="rating-chip"><input type="radio" name="sicherheit" value="1"><span>1<br><small>unsicher</small></span></label>
+        <label class="rating-chip"><input type="radio" name="sicherheit" value="2"><span>2</span></label>
+        <label class="rating-chip"><input type="radio" name="sicherheit" value="3"><span>3</span></label>
+        <label class="rating-chip"><input type="radio" name="sicherheit" value="4"><span>4</span></label>
+        <label class="rating-chip"><input type="radio" name="sicherheit" value="5"><span>5<br><small>sehr sicher</small></span></label>
+      </div>
+
+      <div class="button-row">
+        <button id="btn-save" class="btn-primary">Eintrag speichern</button>
+      </div>
+      <p class="save-hint" id="saveHint"></p>
+
+      <h2 class="history-heading">Meine bisherigen Einträge <span class="history-count" id="historyCount"></span></h2>
+      <div id="historyList" class="history-list"></div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <p>Deine Einträge werden zur Nachbereitung an deine Lehrkraft übermittelt und bleiben zusätzlich in diesem Browser gespeichert, damit du sie hier wiederfindest.</p>
+    <p class="app-footer-brand" id="appFooter">Lern-App Lerntagebuch, erstellt von Thomas Jurtzik</p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
