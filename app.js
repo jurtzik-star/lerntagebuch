@@ -222,11 +222,19 @@
   }
 
   // ---------- Ablauf ----------
+  // Wie in der B1-Lern-App: mindestens Vor- und Nachname nötig, sonst
+  // lässt sich der Eintrag in der Übersicht nicht mehr eindeutig einer
+  // Person zuordnen (z. B. bei Direktaufruf ohne Deep-Link, wo kein Name
+  // vorbefüllt ist).
+  function istVollstaendigerName(value) {
+    return value.trim().split(/\s+/).filter(Boolean).length >= 2;
+  }
   function startFlow() {
     state.name = el.inputName.value.trim();
     state.kurs = el.inputKurs.value;
-    if (!state.name) {
-      alert("Bitte gib deinen Namen ein.");
+    if (!istVollstaendigerName(state.name)) {
+      alert("Bitte gib deinen vollständigen Namen ein (Vor- und Nachname).");
+      el.inputName.focus();
       return;
     }
     localStorage.setItem(LS_KEY_PROFILE, JSON.stringify({ name: state.name, kurs: state.kurs }));
