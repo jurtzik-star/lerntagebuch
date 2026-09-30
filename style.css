@@ -307,3 +307,14 @@ textarea { resize: vertical; }
 .app-footer-brand {
   margin: 0.4rem 0 0;
 }
+
+/* Hinweis zur automatisch gemessenen Übungszeit */
+.auto-hint {
+  margin: 6px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f3eef9;
+  border-left: 4px solid #6b4c93;
+  font-size: 0.85rem;
+  color: #3f2d59;
+}

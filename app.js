@@ -20,8 +20,14 @@
   const urlParams = new URLSearchParams(window.location.search);
   const deepLink = {
     name: urlParams.get("name") || "",
-    kurs: urlParams.get("kurs") || ""
+    kurs: urlParams.get("kurs") || "",
+    // Aus der Kurs-App: aktuelles Kapitel + dort automatisch gemessene
+    // GESAMT-Lernzeit in diesem Kapitel (Minuten). Vorausgefüllt wird nur
+    // der Teil, der seit dem letzten Eintrag zu diesem Kapitel neu dazukam.
+    kapitel: urlParams.get("kapitel") || "",
+    lernzeit: urlParams.has("lernzeit") ? Math.max(0, parseInt(urlParams.get("lernzeit"), 10) || 0) : null
   };
+  const LS_KEY_AUTOZEIT = "lerntagebuch_autozeit";
 
   const state = { name: "", kurs: "" };
 
@@ -47,7 +53,8 @@
     progressList: document.getElementById("progressList"),
 
     historyCount: document.getElementById("historyCount"),
-    historyList: document.getElementById("historyList")
+    historyList: document.getElementById("historyList"),
+    autoHint: document.getElementById("autoHint")
   };
 
   function showStep(step) {
@@ -112,6 +119,49 @@
       opt.textContent = "Kapitel " + k;
       el.inputKapitel.appendChild(opt);
     }
+  }
+
+  // ---------- Automatisch gemessene Übungszeit (aus der Kurs-App) ----------
+  // Gespeichert wird pro Person/Kurs/Kapitel, bis zu welchem Stand der
+  // gemessenen Gesamtzeit schon ein Eintrag gemacht wurde. So wird dieselbe
+  // Zeit nie doppelt vorausgefüllt.
+  function autozeitKey(kapitel) {
+    return state.name.trim().toLowerCase() + "|" + state.kurs + "|" + kapitel;
+  }
+  function loadAutozeit() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY_AUTOZEIT) || "{}") || {}; } catch (e) { return {}; }
+  }
+  function neueAutoMinuten() {
+    if (deepLink.lernzeit === null || !deepLink.kapitel) return 0;
+    const bereits = loadAutozeit()[autozeitKey(deepLink.kapitel)] || 0;
+    return Math.max(0, deepLink.lernzeit - bereits);
+  }
+  function applyAutozeit() {
+    const alt = el.inputMinuten.querySelector("option[data-auto]");
+    if (alt) alt.remove();
+    el.autoHint.textContent = "";
+    el.autoHint.classList.add("hidden");
+    if (!deepLink.kapitel) return;
+    if (el.inputKapitel.querySelector('option[value="' + deepLink.kapitel + '"]')) {
+      el.inputKapitel.value = deepLink.kapitel;
+    }
+    const min = neueAutoMinuten();
+    if (min < 1) return;
+    const opt = document.createElement("option");
+    opt.value = String(min);
+    opt.textContent = min + " Minuten (automatisch gemessen)";
+    opt.setAttribute("data-auto", "1");
+    el.inputMinuten.insertBefore(opt, el.inputMinuten.options[1] || null);
+    el.inputMinuten.value = String(min);
+    el.autoHint.textContent = "⏱ Seit deinem letzten Eintrag hast du in der Kurs-App " + min +
+      " Minuten in Kapitel " + deepLink.kapitel + " geübt. Hast du zusätzlich in Schreiben oder Sprechen geübt, wähle einfach einen passenden höheren Wert.";
+    el.autoHint.classList.remove("hidden");
+  }
+  function merkeAutozeitVerbucht(kapitel) {
+    if (deepLink.lernzeit === null || !deepLink.kapitel || kapitel !== deepLink.kapitel) return;
+    const data = loadAutozeit();
+    data[autozeitKey(kapitel)] = deepLink.lernzeit;
+    try { localStorage.setItem(LS_KEY_AUTOZEIT, JSON.stringify(data)); } catch (e) {}
   }
 
   function resetForm() {
@@ -241,6 +291,7 @@
     updateFooterText();
     el.entryDate.textContent = formatDatum(new Date());
     populateKapitelOptions();
+    applyAutozeit();
     renderHistory();
     renderProgress();
     showStep(el.stepDiary);
@@ -283,12 +334,18 @@
       sicherheit: ratingEl.value
     };
 
+    // Erst merken, dann Formular leeren: die gemessene Zeit dieses Kapitels
+    // gilt damit als eingetragen (auch wenn die/der TN den Wert angepasst hat).
+    merkeAutozeitVerbucht(entry.kapitel);
+    if (el.inputMinuten.querySelector("option[data-auto]")) entry.minutenAutomatisch = true;
+
     const all = loadAllEntries();
     all.push(entry);
     saveAllEntries(all);
     renderHistory();
     renderProgress();
     resetForm();
+    applyAutozeit();
 
     el.saveHint.classList.remove("error");
     el.saveHint.textContent = "Gespeichert ✓";
