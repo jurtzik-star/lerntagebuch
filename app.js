@@ -178,9 +178,20 @@
     textarea.focus();
     try { textarea.setSelectionRange(cursor, cursor); } catch (e) {}
   }
+  // Standard-Platzhalter merken, damit beim Kurswechsel zurückgesetzt wird
+  const STANDARD_PLATZHALTER = {};
+  function setzePlatzhalter(daten) {
+    const ph = (daten && daten.platzhalter) || {};
+    [["gelernt", el.inputGelernt], ["schwierig", el.inputSchwierig], ["ueben", el.inputUeben]].forEach(([key, textarea]) => {
+      if (!(key in STANDARD_PLATZHALTER)) STANDARD_PLATZHALTER[key] = textarea.placeholder;
+      textarea.placeholder = ph[key] || STANDARD_PLATZHALTER[key];
+    });
+  }
+
   function renderSatzanfaenge() {
     document.querySelectorAll(".satz-chips").forEach((d) => d.remove());
     const daten = satzanfaengeFuerKurs();
+    setzePlatzhalter(daten);
     if (!daten) return;
     [["gelernt", el.inputGelernt], ["schwierig", el.inputSchwierig], ["ueben", el.inputUeben]].forEach(([key, textarea]) => {
       const liste = daten[key] || [];

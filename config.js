@@ -90,6 +90,12 @@ const CONFIG = {
     "A2 Oberndorf": {
       gelernt: ["Heute habe ich … gelernt.", "Jetzt kann ich …", "Neue Wörter: …", "Ich habe … geübt."],
       schwierig: ["Schwierig war für mich …", "Ich verstehe noch nicht: …", "Ich habe Probleme mit …", "Heute war alles leicht."],
+      // Einfachere Platzhalter in den Textfeldern (statt z. B. "schwerfiel")
+      platzhalter: {
+        gelernt: "Schreib hier: Was hast du gelernt?",
+        schwierig: "Schreib hier: Was ist schwierig für dich?",
+        ueben: "Schreib hier: Was möchtest du üben?"
+      },
       ueben: ["Ich möchte mehr … üben.", "Nächstes Mal mache ich …", "Ich frage meinen Lehrer nach …", "Ich wiederhole die Wörter von Kapitel …"]
     }
   },
