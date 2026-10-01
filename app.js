@@ -164,6 +164,42 @@
     try { localStorage.setItem(LS_KEY_AUTOZEIT, JSON.stringify(data)); } catch (e) {}
   }
 
+  // ---------- Satzanfänge zum Antippen (nur für Kurse mit Eintrag in CONFIG) ----------
+  function satzanfaengeFuerKurs() {
+    return (CONFIG.SATZANFAENGE_BY_KURS && CONFIG.SATZANFAENGE_BY_KURS[state.kurs]) || null;
+  }
+  function fuegeSatzanfangEin(textarea, vorlage) {
+    const pos = vorlage.indexOf("…");
+    const text = vorlage.replace("…", "");
+    const alt = textarea.value;
+    const trenner = alt && !/\s$/.test(alt) ? " " : "";
+    textarea.value = alt + trenner + text;
+    const cursor = alt.length + trenner.length + (pos >= 0 ? pos : text.length);
+    textarea.focus();
+    try { textarea.setSelectionRange(cursor, cursor); } catch (e) {}
+  }
+  function renderSatzanfaenge() {
+    document.querySelectorAll(".satz-chips").forEach((d) => d.remove());
+    const daten = satzanfaengeFuerKurs();
+    if (!daten) return;
+    [["gelernt", el.inputGelernt], ["schwierig", el.inputSchwierig], ["ueben", el.inputUeben]].forEach(([key, textarea]) => {
+      const liste = daten[key] || [];
+      if (!liste.length) return;
+      const wrap = document.createElement("div");
+      wrap.className = "satz-chips";
+      wrap.setAttribute("aria-label", "Satzanfänge zum Antippen");
+      liste.forEach((vorlage) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "satz-chip";
+        b.textContent = vorlage;
+        b.addEventListener("click", () => fuegeSatzanfangEin(textarea, vorlage));
+        wrap.appendChild(b);
+      });
+      textarea.insertAdjacentElement("afterend", wrap);
+    });
+  }
+
   function resetForm() {
     el.inputKapitel.value = "";
     el.inputGelernt.value = "";
@@ -291,6 +327,7 @@
     updateFooterText();
     el.entryDate.textContent = formatDatum(new Date());
     populateKapitelOptions();
+    renderSatzanfaenge();
     applyAutozeit();
     renderHistory();
     renderProgress();

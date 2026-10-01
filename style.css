@@ -318,3 +318,22 @@ textarea { resize: vertical; }
   font-size: 0.85rem;
   color: #3f2d59;
 }
+
+/* Satzanfänge zum Antippen (z. B. A2-Kurs) */
+.satz-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 4px;
+}
+.satz-chip {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1.5px solid #d8cbe9;
+  background: #f6f1fb;
+  color: #4d3570;
+  cursor: pointer;
+}
+.satz-chip:hover { border-color: #6b4c93; }

@@ -30,7 +30,8 @@ const CONFIG = {
     // identischen entry-IDs, siehe GOOGLE_FORM_ENTRY_IDS unten).
     "B1 Oberndorf (KL T. Jurtzik)": "https://docs.google.com/forms/d/e/1FAIpQLSeve0evlyU9jXJrkXHuy67VjCujet-fEWywKfBeAncTDrQiRw/formResponse",
     "BSK-B1+ Rottweil (KL T. Jurtzik)": "https://docs.google.com/forms/d/e/1FAIpQLSfX5h427oaMAsC_PrEnnKZcENXY9IU9VeWr-CLJ2pgBRWDDFA/formResponse",
-    "BSK-B2 Rottweil (KL T. Jurtzik)": "https://docs.google.com/forms/d/e/1FAIpQLSeMqvbnW6G2L4pfdEtg5Sl_9RMRKa5EX4M7vi62kaWUXSmSgA/formResponse"
+    "BSK-B2 Rottweil (KL T. Jurtzik)": "https://docs.google.com/forms/d/e/1FAIpQLSeMqvbnW6G2L4pfdEtg5Sl_9RMRKa5EX4M7vi62kaWUXSmSgA/formResponse",
+    "A2 Oberndorf": "https://docs.google.com/forms/d/e/1FAIpQLScvMfg1LUpa8BmTGwSC2LZA8-A4QzcxzRHd-HZkfBX4-qclcw/formResponse"
   },
 
   // 2) Die entry.XXXXXXXXX-IDs der einzelnen Formularfelder. Gelten für das
@@ -62,12 +63,13 @@ const CONFIG = {
   GOOGLE_FORM_ENTRY_IDS_MINUTEN_BY_KURS: {
     "B1 Oberndorf (KL T. Jurtzik)": "entry.1375642204",
     "BSK-B1+ Rottweil (KL T. Jurtzik)": "entry.1138130224",
-    "BSK-B2 Rottweil (KL T. Jurtzik)": "entry.1661136890"
+    "BSK-B2 Rottweil (KL T. Jurtzik)": "entry.1661136890",
+    "A2 Oberndorf": "entry.1375642204"
   },
 
   // 3) Auswahlliste der Kurse/Gruppen, die im Dropdown der App erscheinen.
   //    Einfach anpassen/erweitern.
-  KURSE: ["B1 Oberndorf (KL T. Jurtzik)", "BSK-B1+ Rottweil (KL T. Jurtzik)", "BSK-B2 Rottweil (KL T. Jurtzik)"],
+  KURSE: ["B1 Oberndorf (KL T. Jurtzik)", "BSK-B1+ Rottweil (KL T. Jurtzik)", "BSK-B2 Rottweil (KL T. Jurtzik)", "A2 Oberndorf"],
 
   // 4) Wie viele Kapitel hat der jeweilige Kurs? Steuert die Kapitel-Auswahl
   //    im Formular sowie die Anzahl der Fortschrittsbalken ("Meine Lernzeit
@@ -76,11 +78,28 @@ const CONFIG = {
   KAPITEL_ANZAHL_BY_KURS: {
     "B1 Oberndorf (KL T. Jurtzik)": 12,
     "BSK-B1+ Rottweil (KL T. Jurtzik)": 7,
-    "BSK-B2 Rottweil (KL T. Jurtzik)": 12
+    "BSK-B2 Rottweil (KL T. Jurtzik)": 12,
+    "A2 Oberndorf": 20
+  },
+
+  // Satzanfänge zum Antippen unter den drei Reflexionsfragen – nur für
+  // Kurse, die hier eingetragen sind (A2: sprachliche Hilfe, damit auch
+  // Anfänger:innen regelmäßig etwas eintragen können). "…" markiert die
+  // Stelle, an der die Lernenden weiterschreiben.
+  SATZANFAENGE_BY_KURS: {
+    "A2 Oberndorf": {
+      gelernt: ["Heute habe ich … gelernt.", "Jetzt kann ich …", "Neue Wörter: …", "Ich habe … geübt."],
+      schwierig: ["Schwierig war für mich …", "Ich verstehe noch nicht: …", "Ich habe Probleme mit …", "Heute war alles leicht."],
+      ueben: ["Ich möchte mehr … üben.", "Nächstes Mal mache ich …", "Ich frage meinen Lehrer nach …", "Ich wiederhole die Wörter von Kapitel …"]
+    }
   },
 
   // 5) Lernziel in Minuten pro Kapitel, gegen das der Fortschrittsbalken
   //    anzeigt (rein visuelle Orientierung, keine harte Vorgabe). Einfach
-  //    anpassen, wenn du einen anderen Richtwert möchtest.
+  //    anpassen, wenn du einen anderen Richtwert möchtest. Gedacht als
+  //    Summe über alle Übungen/Einheiten eines Kapitels (Wortschatz,
+  //    Grammatik, Hören, Lesen, Schreiben, Sprechen), nicht als eine
+  //    einzelne Sitzung - daher bewusst höher als der Wert für eine
+  //    einzelne Übung.
   LERNZIEL_MINUTEN_PRO_KAPITEL: 120
 };
